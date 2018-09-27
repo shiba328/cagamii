@@ -6,7 +6,7 @@
             v-btn() マーカー追加
             #horizonMaker(v-if="doneMaker")
                 #mask: ul
-                    li(v-for="ele,key,i in doneMaker"): v-btn( @click="seek(ele)") {{ele}}
+                    li(v-for="ele,key,i in doneMaker"): v-btn( @click="seek(ele.msec)") {{ele.label}}
         v-container
             v-layout
                 v-flex: v-text-field(label="YOUTUBE ID" v-model="videoSearchCurrentId")
@@ -47,7 +47,10 @@ export default {
             let m = this.currentVideoMaker
             let r = {}
             Object.keys(m).map((val,key)=>{
-                r[val] = this.convertTime(m[val].toFixed(0))
+                r[val] = {
+                   label: this.convertTime(m[val].toFixed(0)),
+                   msec: m[val]
+                }
             })
             // console.log(r)
             return r
@@ -107,11 +110,12 @@ export default {
             seconds = seconds < 10 ? "0" + seconds : seconds;
             minutes = minutes < 10 ? "0" + minutes : minutes;
 
-            console.log(minutes + ":" + seconds);
+            // console.log(minutes + ":" + seconds);
             return minutes + ":" + seconds
         },
-        seek(sec){
-            console.log(sec)
+        seek(time){
+            console.log(time)
+            this.player.seekTo(time);
         }
     },
 
@@ -119,6 +123,10 @@ export default {
 </script>
 
 <style scoped>
+iframe{
+    width: 100%;
+    height: auto;
+}
 #horizonMaker{
     overflow: hidden;
 }
