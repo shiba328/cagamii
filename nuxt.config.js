@@ -37,15 +37,19 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '@/plugins/vuetify'
+    '@/plugins/vuetify',
+    '~/plugins/firebase'
   ],
 
   /*
   ** Nuxt.js modules
   */
   modules: [
+    '@nuxtjs/axios',
   ],
-
+  axios: {
+    // proxyHeaders: false
+    },
   /*
   ** Build configuration
   */
@@ -53,6 +57,9 @@ module.exports = {
     /*
     ** You can extend webpack config here
     */
+    vendor: [
+      'firebase'
+    ],
     extend(config, ctx) {
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
