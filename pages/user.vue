@@ -21,15 +21,6 @@ export default {
             ]
         }
     },
-    mounted(){
-    },
-    methods: {
-        logout() {
-            this.$firebase.auth().signOut().then(() => {
-                location.href = '/';
-            });
-        }
-    }
 }
 </script>
 

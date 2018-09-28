@@ -3,25 +3,18 @@ node_js:
   - 10.6.0
 install:
   - npm install -g firebase-tools
-  - npm i basic-auth-connect
-  - gem install sass
-  - gem install compass
-  - gem install slim
+  - npm i nuxt
 after_success:
   - npm i -g firebase-ci
   - cd functions
   - npm install
   - cd ../
+  - npm run generate
   - firebase-ci deploy
 branches:
   only:
     - master
 script:
-  - compass compile
-  - slimrb -p -r slim/include www/index.slim > www/index.html
-  - slimrb -p -r slim/include www/login.slim > www/login.html
-  - slimrb -p -r slim/include www/signup.slim > www/signup.html
-  - slimrb -p -r slim/include www/user.slim > www/user.html
   - echo "Deploy"
 deploy:
   provider: firebase

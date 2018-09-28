@@ -1,6 +1,6 @@
 export const strict = false
 export const state = () => ({
-    user: null,
+    user: false,
     setting: null,
 })
 export const mutations = {
@@ -9,4 +9,7 @@ export const mutations = {
     }
 }
 export const actions = {
+    actionSetUser({commit},user){
+        console.log("actionSetUser")
+    }
 }

@@ -4,7 +4,6 @@ const nodeExternals = require('webpack-node-externals')
 
 module.exports = {
   mode: 'spa',
-
   /*
   ** Headers of the page
   */
@@ -20,7 +19,9 @@ module.exports = {
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }
     ]
   },
-
+  router: {
+    middleware: 'auth'
+  },
   /*
   ** Customize the progress-bar color
   */
@@ -40,7 +41,6 @@ module.exports = {
     '@/plugins/vuetify',
     '~/plugins/firebase'
   ],
-
   /*
   ** Nuxt.js modules
   */

@@ -9,7 +9,7 @@
             v-card-text
                 v-list(two-line)
                     template(v-for="(line, index) in lines" v-if="listen")
-                        v-list-tile( avatar)
+                        v-list-tile( avatar :key="line.date")
                             v-list-tile-avatar {{ index + 1 }} SEG
                             v-list-tile-content
                                 v-list-tile-title ATARI {{ index + 1 }}
@@ -19,13 +19,13 @@
                         v-divider
                         v-list(style="position: relative")
                             template(v-for="(l, key, ind) in line.line")
-                                v-layout(align-center)
+                                v-layout(align-center :key="key")
                                     v-flex.text-xs-center
                                         .display-1 {{ind+1}} 
                                         .headline Line
                                         v-select(solo :items="plant" v-model="l.plant")
                                     v-flex                  
-                                        v-layout(v-for="(p, i) in l.points" :key="p")
+                                        v-layout(v-for="(p, i) in l.points" :key="i")
                                             v-flex(v-if="i == 0") 始点
                                             v-flex(v-else-if="i == (Object.keys(l.points).length - 1)") 終点
                                             v-flex(v-else) {{i}}点
