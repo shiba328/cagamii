@@ -22,6 +22,7 @@
     "pug-plain-loader": "^1.0.0",
     "sass-loader": "^7.1.0",
     "vue-youtube": "^1.2.5",
+    "vuedraggable": "^2.16.0",
     "vuetify": "^1.1.0"
   },
   "devDependencies": {

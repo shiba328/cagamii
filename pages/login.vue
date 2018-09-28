@@ -12,9 +12,12 @@ var firebaseui = require('firebaseui');
 export default {
     mounted(){
         require('firebaseui/dist/firebaseui.css');
-        var ui = new firebaseui.auth.AuthUI(firebase.auth());
+        let ui = firebaseui.auth.AuthUI.getInstance();
+        if (!ui) {
+            ui = new firebaseui.auth.AuthUI(firebase.auth());
+        }
         ui.start('#firebaseui-auth-container', {
-        signInSuccessUrl:"user",
+        signInSuccessUrl:"/user",
         signInOptions: [
             firebase.auth.EmailAuthProvider.PROVIDER_ID,
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,

@@ -1,12 +1,16 @@
 <template lang="pug">
-    v-content
+    v-content()
         p ビデオスキップとは？<br>YOUTUBEの動画に再生マーカーを追加できます。
         template(v-if="videoId")
-            youtube(:video-id="videoId" ref="youtube")
-            v-btn() マーカー追加
-            #horizonMaker(v-if="doneMaker")
-                #mask: ul
-                    li(v-for="ele,key,i in doneMaker"): v-btn( @click="seek(ele.msec)") {{ele.label}}
+            youtube#video(:video-id="videoId" ref="youtube" :player-vars="playerVars")
+            v-toolbar(dense)
+                v-btn-toggle
+                    v-btn(flat @click="addMaker"): v-icon add
+                v-divider(vertical)
+                v-btn-toggle#horizonMaker(v-if="doneMaker")
+                    #mask(v-model="doneMaker")
+                        draggable#area(v-model='doneMaker')
+                            div.btn(v-for="ele,key,i in doneMaker"): v-btn(@click="seek(ele.msec)") {{ele.label}}
         v-container
             v-layout
                 v-flex: v-text-field(label="YOUTUBE ID" v-model="videoSearchCurrentId")
@@ -22,19 +26,33 @@
                                 v-list-tile-title {{ list.title }}
                             v-list-tile-action
                                 v-icon(fab color="grey lighten-1" @click="del(key)") delete
+                        v-container(v-if="videoId == key") 
+                            template(v-for="ele,k,i in doneMaker")
+                                v-list-tile
+                                    v-list-tile-content  {{ele.label}}
+                                    v-list-tile-action
+                                        v-icon(fab color="grey lighten-1" @click="MakerDel(key,ele.key)") delete
+                                v-divider(v-if="i + 1 < Object.keys(doneMaker).length")
                         v-divider(v-if="index + 1 < Object.keys(lists).length")
 </template>
 
 <script>
+import draggable from "vuedraggable";
 import Vue from "vue";
 import VueYoutube from "vue-youtube";
 Vue.use(VueYoutube);
 export default {
+    components: {
+        draggable
+    },
     data(){
         return{
             user:this.$store.state.user,
             videoSearchCurrentId:"M7lc1UVf-VE",
             currentVideoMaker:"",
+            playerVars: {
+                playsinline: 1,
+            },
             videoId:"",
             lists:[],
         }
@@ -44,16 +62,20 @@ export default {
             return this.$refs.youtube.player;
         },
         doneMaker(){
-            let m = this.currentVideoMaker
+            // let m = Object.values(this.currentVideoMaker)
+            if(this.currentVideoMaker == null) return　false
+            let m = Object.entries(this.currentVideoMaker).map(([key, msec]) => ({key,msec}));
             let r = {}
-            Object.keys(m).map((val,key)=>{
-                r[val] = {
-                   label: this.convertTime(m[val].toFixed(0)),
-                   msec: m[val]
-                }
+            // console.log(m)
+
+            var s = m.slice(0);
+            s.sort(function(a,b) {
+                return a.msec - b.msec;
+            });
+            s.map((val,i)=>{
+                val["label"] = this.convertTime(val.msec.toFixed(0))
             })
-            // console.log(r)
-            return r
+            return s
         }
     },
     mounted(){
@@ -61,21 +83,41 @@ export default {
     },
     methods:{
         listen () {
+            console.log("listen")
             let ref = `users/${this.user.uid}/videos/`
             this.$firebase.database().ref(ref).on('value', snapshot => {
                 if (snapshot) {
                     const rootList = snapshot.val()
                     this.lists = rootList
-                    // console.log(rootList)
                 }
             })
         },
+        MakerDel(key,skey){
+            if(window.confirm("削除します")){
+                let ref = `users/${this.user.uid}/videos/${key}/maker`
+                this.$firebase.database().ref(ref).child(skey).remove()
+            }
+        },
         del(key){
-            alert(key)
             if(window.confirm("削除します")){
                 let ref = `users/${this.user.uid}/videos/${key}`
                 this.$firebase.database().ref(ref).remove()
             }
+        },
+        addMaker(){
+            this.player.pauseVideo();
+            let newCT = {...this.currentVideoMaker}
+            this.player.getCurrentTime().then(time => {
+                if(time == 0 ) return false
+                this.player.playVideo();
+                let id = this.videoId;
+                
+                let ref = `/users/${this.user.uid}/videos/${id}/maker/`
+                var newPostKey = this.$firebase.database().ref(ref).push().key;
+                this.$firebase.database().ref(ref+newPostKey).set(time);
+                newCT[newPostKey] = time
+                this.currentVideoMaker = newCT
+            });
         },
         add(){
             let id = this.videoSearchCurrentId;
@@ -91,7 +133,6 @@ export default {
                     "id": id,
                     "title": snippet.title,
                     "thumbnail": snippet.thumbnails.default.url,
-                    "maker": [1.0]
                 }
                 var updates = {};
                 updates['/users/' + this.user.uid + '/videos/' + id] = item;
@@ -99,8 +140,15 @@ export default {
             })
         },
         setVideoID(key){
+            // console.log("setVideoID" , key)
             this.videoId = key
-            this.currentVideoMaker = this.lists[key]["maker"]
+            let ref = `users/${this.user.uid}/videos/${key}/maker/`
+            this.$firebase.database().ref(ref).on('value', snapshot => {
+                if (snapshot) {
+                    // console.log("setVideoID" ,snapshot.val())
+                    this.currentVideoMaker = snapshot.val()
+                }
+            })
         },
         convertTime(time) {
             time = Math.round(time);
@@ -113,20 +161,27 @@ export default {
             // console.log(minutes + ":" + seconds);
             return minutes + ":" + seconds
         },
-        seek(time){
-            console.log(time)
-            this.player.seekTo(time);
+        seek(sec){
+            this.player.seekTo(sec);
+            this.firebaseAddNow(sec)
+        },
+        firebaseAddNow(sec){
+            let id = this.videoSearchCurrentId;
+            let ref = `/users/${this.user.uid}/videos/${id}/nowMaker`
+            this.$firebase.database().ref(ref).set(sec);
         }
     },
 
 }
 </script>
-
-<style scoped>
-iframe{
-    width: 100%;
-    height: auto;
+<style>
+#video{
+    width: 100% !important;
+    height: auto !important;
 }
+</style>
+<style scoped>
+
 #horizonMaker{
     overflow: hidden;
 }
@@ -135,13 +190,13 @@ iframe{
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;  /* 慣性スクロール */
 }
-#horizonMaker ul{
+#horizonMaker #area{
     margin: 0;
     padding: 0;
-  display: inline-table;
-  max-width: 100%;
+    display: inline-table;
+    max-width: 100%;
 }
-#horizonMaker li{
+#horizonMaker .btn{
     display: table-cell;
 }
 </style>

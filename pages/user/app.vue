@@ -1,42 +1,43 @@
 <template lang="pug">
     v-content
         p あたり線とは？<br>Cagamii専用アプリを起動すると、登録されたあたり線が表示されます。
-        v-card
-            v-toolbar(style="position: relative") あたり線
-                v-spacer
-                v-btn(absolute bottom right fab dark small color="indigo" @click="addSegment")
-                    v-icon add
-            v-card-text
-                v-list(two-line)
-                    template(v-for="(line, index) in lines" v-if="listen")
-                        v-list-tile( avatar :key="line.date")
-                            v-list-tile-avatar {{ index + 1 }} SEG
-                            v-list-tile-content
-                                v-list-tile-title ATARI {{ index + 1 }}
-                                v-list-tile-sub-title  {{ line.date }}
-                            v-list-tile-action
-                                v-icon(fab color="grey lighten-1" @click="del(line.key)") delete
-                        v-divider
-                        v-list(style="position: relative")
-                            template(v-for="(l, key, ind) in line.line")
-                                v-layout(align-center :key="key")
-                                    v-flex.text-xs-center
-                                        .display-1 {{ind+1}} 
-                                        .headline Line
-                                        v-select(solo :items="plant" v-model="l.plant")
-                                    v-flex                  
-                                        v-layout(v-for="(p, i) in l.points" :key="i")
-                                            v-flex(v-if="i == 0") 始点
-                                            v-flex(v-else-if="i == (Object.keys(l.points).length - 1)") 終点
-                                            v-flex(v-else) {{i}}点
-                                            v-flex: v-text-field(type="number" label="X" :value="p.x")
-                                            v-flex: v-text-field(type="number" label="Y" :value="p.y") 
-                                    v-flex
-                                        v-icon(fab color="grey lighten-1" @click="del(line.key+'/line/'+key)") delete
-                                v-divider
-                            v-btn(absolute bottom right fab small )
-                                v-icon(color="grey lighten-1" @click="addLine(line.key)") add
-                        v-divider(v-if="index + 1 < lines.length")
+        v-container
+            v-card
+                v-toolbar(style="position: relative") あたり線
+                    v-spacer
+                    v-btn(absolute bottom right fab dark small color="indigo" @click="addSegment")
+                        v-icon add
+                v-card-text
+                    v-list(two-line)
+                        template(v-for="(line, index) in lines" v-if="listen")
+                            v-list-tile( avatar :key="line.date")
+                                v-list-tile-avatar {{ index + 1 }} SEG
+                                v-list-tile-content
+                                    v-list-tile-title ATARI {{ index + 1 }}
+                                    v-list-tile-sub-title  {{ line.date }}
+                                v-list-tile-action
+                                    v-icon(fab color="grey lighten-1" @click="del(line.key)") delete
+                            v-divider
+                            v-list(style="position: relative")
+                                template(v-for="(l, key, ind) in line.line")
+                                    v-layout(align-center :key="key")
+                                        v-flex.text-xs-center
+                                            .display-1 {{ind+1}} 
+                                            .headline Line
+                                            v-select(solo :items="plant" v-model="l.plant")
+                                        v-flex                  
+                                            v-layout(v-for="(p, i) in l.points" :key="i")
+                                                v-flex(v-if="i == 0") 始点
+                                                v-flex(v-else-if="i == (Object.keys(l.points).length - 1)") 終点
+                                                v-flex(v-else) {{i}}点
+                                                v-flex: v-text-field(type="number" label="X" :value="p.x")
+                                                v-flex: v-text-field(type="number" label="Y" :value="p.y") 
+                                        v-flex
+                                            v-icon(fab color="grey lighten-1" @click="del(line.key+'/line/'+key)") delete
+                                    v-divider
+                                v-btn(absolute bottom right fab small )
+                                    v-icon(color="grey lighten-1" @click="addLine(line.key)") add
+                            v-divider(v-if="index + 1 < lines.length")
 </template>
 
 <script>

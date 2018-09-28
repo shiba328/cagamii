@@ -22,7 +22,7 @@ export default function ({ store, route, redirect }) {
 	})
 	return p.catch(function(e){
 		console.log(e)
-		if(route.name != 'index' && route.name != 'login'){
+		if(route.name == 'user'){
 			redirect('/')
 		}
 	})
