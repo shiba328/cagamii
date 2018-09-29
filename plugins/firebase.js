@@ -1,7 +1,7 @@
 const firebase = require("firebase")
 
 firebase.initializeApp({
-    apiKey: "AIzaSyBdm54bGXsbcTFtPf-d87_9bC61gySc-q4",
+    apiKey: "AIzaSyC1m5I3MdJMYR2uCBvvVJCzFLZAYDgEPXg",
     authDomain: "cagamii-b28c2.firebaseapp.com",
     databaseURL: "https://cagamii-b28c2.firebaseio.com",
     projectId: "cagamii-b28c2",

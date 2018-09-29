@@ -17,7 +17,8 @@ export default {
             submenu:[
                 {title:"ダッシュボード",icon:"dashboard",link:"/user"},
                 {title:"あたり線",icon:"tablet_mac",link:"/user/app"},
-                {title:"ビデオスキップ",icon:"queue_play_next",link:"/user/videoskip"}
+                {title:"ビデオスキップ",icon:"queue_play_next",link:"/user/videoskip"},
+                {title:"ポーチの中身",icon:"card_travel",link:"/user/pouch"},
             ]
         }
     },

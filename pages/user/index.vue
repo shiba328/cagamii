@@ -18,6 +18,13 @@
             v-text-field(label="Display Name" v-model="user.displayName")
             v-text-field(required label="Mail Address" v-model="user.email")
         v-btn(@click="updatePassword") パスワード変更メールを送る
+        v-btn(@click="getGps") 天気予報をセット
+        div 
+            div: img(:src="weather.icon")
+            div 湿度:{{weather.humidity}}%
+            div 気温:{{weather.temp}}°
+            div 最高気温：{{weather.temp_max}}°
+            div 最低気温：{{weather.temp_min}}°
 </template>
 
 <script>
@@ -26,9 +33,87 @@ export default {
     return{
       user: this.$store.state.user,
       imageData:"",
+      account:"",
+      weather:"",
     }
   },
+  mounted(){
+      this.listen()
+  },
   methods:{
+    getWeather(){
+        const API_KEY = "5813987565480d2e852d996eb4b4ea18";
+        const url = "https://api.openweathermap.org/data/2.5/find";
+        // const city = this.account.city;
+        const location = this.account.location;
+        const lat = location.split(',')[0]
+        const lon = location.split(',')[1]
+        const icon_url = "http://openweathermap.org/img/w/";
+        let p = new Promise((resolve, reject) => {
+            let data = this.$axios.$get(`${url}?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`)
+            resolve(data);
+        })
+        p.then(v=>{
+            const today = v.list[0]
+            console.log(today)
+            this.weather = {
+                'humidity': today.main.humidity,
+                'temp': today.main.temp,
+                'temp_max': today.main.temp_max,
+                'temp_min': today.main.temp_min,
+                'icon': icon_url + today.weather[0].icon + '.png',
+                'description': today.weather[0].temp_min,
+            }
+        })
+        return p.catch(v=>{
+            alert("エラーが発生しました。再設定してください。(Weather)")
+        })
+    },
+    listen () {
+        let ref = `users/${this.user.uid}/account/`
+        this.$firebase.database().ref(ref).on('value', snapshot => {
+            if (snapshot) {
+                this.account = snapshot.val()
+                this.getWeather()
+            }
+        })
+    },
+    getGps(){
+        navigator.geolocation.getCurrentPosition(location=>{
+            this.getGpsCity(location)
+        })
+    },
+    getGpsCity(location){
+        const lat = location.coords.latitude
+        const lng = location.coords.longitude
+        const apikey = "AIzaSyC1m5I3MdJMYR2uCBvvVJCzFLZAYDgEPXg";
+        const geoUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng="
+        let p = new Promise((resolve, reject) => {
+            let data = this.$axios.$get(`${geoUrl}${lat},${lng}&language=en&key=${apikey}`)
+            resolve(data);
+        })
+        return p.then(v=>{
+            console.log(v)
+            var locality = v.results[0].address_components.filter(function(component) {
+                return component.types.indexOf("locality") > -1;
+            });
+            var city = v.results[0].address_components.filter(function(component) {
+                return component.types.indexOf("administrative_area_level_1") > -1;
+            });
+    
+            let ref = `users/${this.user.uid}/account/`
+            var updates = {};
+            updates[ref + "locality"] = locality[0].long_name
+            updates[ref + "city"] = city[0].long_name
+            updates[ref + "location"] =`${lat},${lng}`;
+
+            this.$firebase.database().ref().update(updates);
+            // this.$firebase.database().ref(ref).child("city").set()
+        })
+        p.catch(v=>{
+            alert("エラーが発生しました。再設定してください。(geocode)")
+        })
+    },
     selectFiles(e){
       const files = e.target.files
       let url = URL.createObjectURL(files[0])
